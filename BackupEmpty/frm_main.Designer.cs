@@ -48,6 +48,7 @@
             this.btn_listInstance = new System.Windows.Forms.Button();
             this.mnu_dlList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.patientezToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bgd_loading = new System.ComponentModel.BackgroundWorker();
             this.mnu_dlList.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -223,6 +224,11 @@
             this.patientezToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.patientezToolStripMenuItem.Text = "Patientez...";
             // 
+            // bgd_loading
+            // 
+            this.bgd_loading.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgd_loading_DoWork);
+            this.bgd_loading.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bgd_loading_RunWorkerCompleted);
+            // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -277,6 +283,7 @@
         private System.Windows.Forms.Button btn_listInstance;
         private System.Windows.Forms.ContextMenuStrip mnu_dlList;
         private System.Windows.Forms.ToolStripMenuItem patientezToolStripMenuItem;
+        private System.ComponentModel.BackgroundWorker bgd_loading;
     }
 }
 

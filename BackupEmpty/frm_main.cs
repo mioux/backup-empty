@@ -35,6 +35,8 @@ namespace BackupEmpty
         /// </summary>
         private static string beIV = "z1Tm947j";
 
+        private static List<string> sqlList = new List<string>();
+
         /// <summary>
         /// Constructeur
         /// </summary>
@@ -49,9 +51,8 @@ namespace BackupEmpty
             txt_server.Text = Properties.Settings.Default.Server;
             chx_trusted.Checked = Properties.Settings.Default.TrustedConnection;
 
-            /*Thread sqlMenu = new Thread(CreateSqlInstanceMenu);
-            sqlMenu.Start();*/
-            CreateSqlInstanceMenu();
+            bgd_loading.RunWorkerAsync();
+            //CreateSqlInstanceMenu();
         }
 
         /// <summary>
@@ -142,7 +143,7 @@ try
             SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
             DataTable dbList = instance.GetDataSources();
 
-            mnu_dlList.Items.Clear();
+            //mnu_dlList.Items.Clear();
 
             foreach (DataRow curServer in dbList.Rows)
             {
@@ -152,7 +153,8 @@ try
                 if (curServer["InstanceName"] != null && curServer["InstanceName"] != DBNull.Value && curServer["InstanceName"].ToString() != string.Empty)
                     name += "\\" + curServer["InstanceName"].ToString();
 
-                mnu_dlList.Items.Add(name, Properties.Resources.sql, menuClick);
+                //mnu_dlList.Items.Add(name, Properties.Resources.sql, menuClick);
+                sqlList.Add(name);
             }
         }
         
@@ -580,6 +582,35 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         private void frm_main_FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void bgd_loading_DoWork(object sender, DoWorkEventArgs e)
+        {
+            CreateSqlInstanceMenu();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void bgd_loading_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled == false)
+            {
+                mnu_dlList.Items.Clear();
+
+                foreach (string curSql in sqlList)
+                    mnu_dlList.Items.Add(curSql, Properties.Resources.sql, menuClick);
+            }
+
         }
     }
 }
