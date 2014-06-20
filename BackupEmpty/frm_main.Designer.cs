@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.lbl_server = new System.Windows.Forms.Label();
             this.txt_server = new System.Windows.Forms.TextBox();
             this.txt_login = new System.Windows.Forms.TextBox();
@@ -44,6 +45,10 @@
             this.cbx_dblist = new System.Windows.Forms.ComboBox();
             this.chx_trusted = new System.Windows.Forms.CheckBox();
             this.ofd_backup = new System.Windows.Forms.OpenFileDialog();
+            this.btn_listInstance = new System.Windows.Forms.Button();
+            this.mnu_dlList = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.patientezToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnu_dlList.SuspendLayout();
             this.SuspendLayout();
             // 
             // lbl_server
@@ -59,7 +64,7 @@
             // 
             this.txt_server.Location = new System.Drawing.Point(190, 6);
             this.txt_server.Name = "txt_server";
-            this.txt_server.Size = new System.Drawing.Size(285, 20);
+            this.txt_server.Size = new System.Drawing.Size(252, 20);
             this.txt_server.TabIndex = 1;
             // 
             // txt_login
@@ -189,11 +194,36 @@
             this.ofd_backup.RestoreDirectory = true;
             this.ofd_backup.Title = "Fichier source";
             // 
+            // btn_listInstance
+            // 
+            this.btn_listInstance.Location = new System.Drawing.Point(448, 4);
+            this.btn_listInstance.Name = "btn_listInstance";
+            this.btn_listInstance.Size = new System.Drawing.Size(27, 23);
+            this.btn_listInstance.TabIndex = 2;
+            this.btn_listInstance.Text = "...";
+            this.btn_listInstance.UseVisualStyleBackColor = true;
+            this.btn_listInstance.Click += new System.EventHandler(this.btn_listInstance_Click);
+            // 
+            // mnu_dlList
+            // 
+            this.mnu_dlList.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.patientezToolStripMenuItem});
+            this.mnu_dlList.Name = "mnu_dlList";
+            this.mnu_dlList.Size = new System.Drawing.Size(143, 26);
+            // 
+            // patientezToolStripMenuItem
+            // 
+            this.patientezToolStripMenuItem.Enabled = false;
+            this.patientezToolStripMenuItem.Name = "patientezToolStripMenuItem";
+            this.patientezToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.patientezToolStripMenuItem.Text = "Patientez...";
+            // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(489, 195);
+            this.Controls.Add(this.btn_listInstance);
             this.Controls.Add(this.chx_trusted);
             this.Controls.Add(this.cbx_dblist);
             this.Controls.Add(this.btn_refresh);
@@ -214,6 +244,7 @@
             this.MinimizeBox = false;
             this.Name = "frm_main";
             this.Text = "Backup et vidage";
+            this.mnu_dlList.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -237,6 +268,9 @@
         private System.Windows.Forms.ComboBox cbx_dblist;
         private System.Windows.Forms.CheckBox chx_trusted;
         private System.Windows.Forms.OpenFileDialog ofd_backup;
+        private System.Windows.Forms.Button btn_listInstance;
+        private System.Windows.Forms.ContextMenuStrip mnu_dlList;
+        private System.Windows.Forms.ToolStripMenuItem patientezToolStripMenuItem;
     }
 }
 

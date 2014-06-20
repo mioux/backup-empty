@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.IO;
+using System.Data.Sql;
+using System.Threading;
 
 namespace BackupEmpty
 {
@@ -29,6 +31,45 @@ namespace BackupEmpty
         public frm_main()
         {
             InitializeComponent();
+            
+            /*Thread sqlMenu = new Thread(CreateSqlInstanceMenu);
+            sqlMenu.Start();*/
+            CreateSqlInstanceMenu();
+        }
+
+        /// <summary>
+        /// Création de la liste des menus SQL
+        /// </summary>
+
+        private void CreateSqlInstanceMenu()
+        {
+            SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
+            DataTable dbList = instance.GetDataSources();
+
+            mnu_dlList.Items.Clear();
+
+            foreach (DataRow curServer in dbList.Rows)
+            {
+                string name = "";
+                if (curServer["ServerName"] != null && curServer["ServerName"] != DBNull.Value)
+                    name = curServer["ServerName"].ToString();
+                if (curServer["InstanceName"] != null && curServer["InstanceName"] != DBNull.Value && curServer["InstanceName"].ToString() != string.Empty)
+                    name += "\\" + curServer["InstanceName"].ToString();
+
+                mnu_dlList.Items.Add(name, Properties.Resources.sql, menuClick);
+            }
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void menuClick(object sender, EventArgs e)
+        {
+            if (sender is ToolStripMenuItem)
+                txt_server.Text = ((ToolStripMenuItem)sender).Text;
         }
 
         /// <summary>
@@ -376,6 +417,17 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
             }
 
             this.Enabled = true;
+        }
+
+        /// <summary>
+        /// Affichage de la liste des instances détectées
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void btn_listInstance_Click(object sender, EventArgs e)
+        {
+            mnu_dlList.Show(MousePosition);
         }
     }
 }
