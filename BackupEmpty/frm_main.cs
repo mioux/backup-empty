@@ -180,7 +180,7 @@ try
 
         private void chx_trusted_CheckedChanged(object sender, EventArgs e)
         {
-            txt_login.Enabled = txt_passwd.Enabled = !chx_trusted.Checked;
+            txt_login.Enabled = txt_passwd.Enabled = chx_savePW.Enabled = !chx_trusted.Checked;
             Settings.Default.TrustedConnection = chx_trusted.Checked;
         }
 
