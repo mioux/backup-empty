@@ -49,6 +49,7 @@
             this.mnu_dlList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.patientezToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bgd_loading = new System.ComponentModel.BackgroundWorker();
+            this.chx_savePW = new System.Windows.Forms.CheckBox();
             this.mnu_dlList.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -82,7 +83,7 @@
             this.txt_passwd.Location = new System.Drawing.Point(190, 58);
             this.txt_passwd.Name = "txt_passwd";
             this.txt_passwd.PasswordChar = '●';
-            this.txt_passwd.Size = new System.Drawing.Size(285, 20);
+            this.txt_passwd.Size = new System.Drawing.Size(185, 20);
             this.txt_passwd.TabIndex = 5;
             this.txt_passwd.TextChanged += new System.EventHandler(this.txt_passwd_TextChanged);
             // 
@@ -229,11 +230,23 @@
             this.bgd_loading.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgd_loading_DoWork);
             this.bgd_loading.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bgd_loading_RunWorkerCompleted);
             // 
+            // chx_savePW
+            // 
+            this.chx_savePW.AutoSize = true;
+            this.chx_savePW.Location = new System.Drawing.Point(381, 60);
+            this.chx_savePW.Name = "chx_savePW";
+            this.chx_savePW.Size = new System.Drawing.Size(96, 17);
+            this.chx_savePW.TabIndex = 6;
+            this.chx_savePW.Text = "Sauvegarder ?";
+            this.chx_savePW.UseVisualStyleBackColor = true;
+            this.chx_savePW.CheckedChanged += new System.EventHandler(this.chx_savePW_CheckedChanged);
+            // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(489, 195);
+            this.Controls.Add(this.chx_savePW);
             this.Controls.Add(this.btn_listInstance);
             this.Controls.Add(this.chx_trusted);
             this.Controls.Add(this.cbx_dblist);
@@ -284,6 +297,7 @@
         private System.Windows.Forms.ContextMenuStrip mnu_dlList;
         private System.Windows.Forms.ToolStripMenuItem patientezToolStripMenuItem;
         private System.ComponentModel.BackgroundWorker bgd_loading;
+        private System.Windows.Forms.CheckBox chx_savePW;
     }
 }
 

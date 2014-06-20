@@ -10,6 +10,7 @@ using System.IO;
 using System.Data.Sql;
 using System.Threading;
 using System.Security.Cryptography;
+using BackupEmpty.Properties;
 
 namespace BackupEmpty
 {
@@ -45,11 +46,12 @@ namespace BackupEmpty
         {
             InitializeComponent();
 
-            txt_file.Text = Properties.Settings.Default.File;
-            txt_login.Text = Properties.Settings.Default.Login;
-            txt_passwd.Text = Decypher(Properties.Settings.Default.Password);
-            txt_server.Text = Properties.Settings.Default.Server;
-            chx_trusted.Checked = Properties.Settings.Default.TrustedConnection;
+            txt_file.Text = Settings.Default.File;
+            txt_login.Text = Settings.Default.Login;
+            txt_passwd.Text = Decypher(Settings.Default.Password);
+            txt_server.Text = Settings.Default.Server;
+            chx_trusted.Checked = Settings.Default.TrustedConnection;
+            chx_savePW.Checked = Settings.Default.SavePW;
 
             bgd_loading.RunWorkerAsync();
             //CreateSqlInstanceMenu();
@@ -114,7 +116,7 @@ try
             catch
             {
                 CDData = "";
-                Properties.Settings.Default.Password = "";
+                Settings.Default.Password = "";
 #if DEBUG
                 MessageBox.Show("Erreur lors du " + (isDecypher ? "dé" : "") + "chiffrement du mot de passe", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
 #endif
@@ -153,7 +155,7 @@ try
                 if (curServer["InstanceName"] != null && curServer["InstanceName"] != DBNull.Value && curServer["InstanceName"].ToString() != string.Empty)
                     name += "\\" + curServer["InstanceName"].ToString();
 
-                //mnu_dlList.Items.Add(name, Properties.Resources.sql, menuClick);
+                //mnu_dlList.Items.Add(name,Resources.sql, menuClick);
                 sqlList.Add(name);
             }
         }
@@ -179,7 +181,7 @@ try
         private void chx_trusted_CheckedChanged(object sender, EventArgs e)
         {
             txt_login.Enabled = txt_passwd.Enabled = !chx_trusted.Checked;
-            Properties.Settings.Default.TrustedConnection = chx_trusted.Checked;
+            Settings.Default.TrustedConnection = chx_trusted.Checked;
         }
 
         /// <summary>
@@ -537,7 +539,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 
         private void txt_server_TextChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Server = txt_server.Text;
+            Settings.Default.Server = txt_server.Text;
         }
 
         /// <summary>
@@ -548,18 +550,27 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 
         private void txt_login_TextChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Login = txt_login.Text;
+            Settings.Default.Login = txt_login.Text;
         }
 
         /// <summary>
-        /// Sauvegarde du mot de passe
+        /// Modification du mot de passe
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
 
         private void txt_passwd_TextChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Password = Cypher(txt_passwd.Text);
+            SavePwd();
+        }
+
+        /// <summary>
+        /// Sauvegarde du mot de passe
+        /// </summary>
+
+        private void SavePwd()
+        {
+            Settings.Default.Password = chx_savePW.Checked ? Cypher(txt_passwd.Text) : "";
         }
 
         /// <summary>
@@ -570,7 +581,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 
         private void txt_file_TextChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.File = txt_file.Text;
+            Settings.Default.File = txt_file.Text;
         }
 
         /// <summary>
@@ -581,7 +592,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 
         private void frm_main_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Properties.Settings.Default.Save();
+            Settings.Default.Save();
         }
 
         /// <summary>
@@ -608,9 +619,21 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                 mnu_dlList.Items.Clear();
 
                 foreach (string curSql in sqlList)
-                    mnu_dlList.Items.Add(curSql, Properties.Resources.sql, menuClick);
+                    mnu_dlList.Items.Add(curSql,Resources.sql, menuClick);
             }
 
+        }
+
+        /// <summary>
+        /// Modification de la sauvegarde du mot de passe
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void chx_savePW_CheckedChanged(object sender, EventArgs e)
+        {
+            SavePwd();
+            Settings.Default.SavePW = chx_savePW.Checked;
         }
     }
 }

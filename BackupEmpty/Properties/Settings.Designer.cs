@@ -94,5 +94,17 @@ namespace BackupEmpty.Properties {
                 this["File"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SavePW {
+            get {
+                return ((bool)(this["SavePW"]));
+            }
+            set {
+                this["SavePW"] = value;
+            }
+        }
     }
 }
