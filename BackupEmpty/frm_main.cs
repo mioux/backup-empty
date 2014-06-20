@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Data.Sql;
 using System.Threading;
+using System.Security.Cryptography;
 
 namespace BackupEmpty
 {
@@ -25,6 +26,16 @@ namespace BackupEmpty
         private SqlConnection con = null;
 
         /// <summary>
+        /// CHANGEME !!! Clef de chiffrement TripleDES
+        /// </summary>
+        private static string beKEY = "!+7.Z*~S.;|Te93:X5::J~*D";
+
+        /// <summary>
+        /// CHANGEME !!! Vecteur d'initialisation TripleDES
+        /// </summary>
+        private static string beIV = "z1Tm947j";
+
+        /// <summary>
         /// Constructeur
         /// </summary>
 
@@ -34,13 +45,92 @@ namespace BackupEmpty
 
             txt_file.Text = Properties.Settings.Default.File;
             txt_login.Text = Properties.Settings.Default.Login;
-            txt_passwd.Text = Properties.Settings.Default.Password;
+            txt_passwd.Text = Decypher(Properties.Settings.Default.Password);
             txt_server.Text = Properties.Settings.Default.Server;
             chx_trusted.Checked = Properties.Settings.Default.TrustedConnection;
 
             /*Thread sqlMenu = new Thread(CreateSqlInstanceMenu);
             sqlMenu.Start();*/
             CreateSqlInstanceMenu();
+        }
+
+        /// <summary>
+        /// Déchiffrer
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+
+        private string Decypher(string p)
+        {
+            return CD(p, true);
+        }
+
+        /// <summary>
+        /// Chiffre ou déchiffre
+        /// </summary>
+        /// <param name="p"></param>
+
+        private string CD(string p, bool isDecypher)
+        {
+            string CDData = "";
+
+            if (string.IsNullOrEmpty(p))
+                return CDData;
+try
+            {
+                TripleDES td = TripleDES.Create();
+                td.IV = Encoding.ASCII.GetBytes(beIV);
+                td.Key = Encoding.ASCII.GetBytes(beKEY);
+                td.Mode = CipherMode.CBC;
+                td.Padding = PaddingMode.PKCS7;
+
+                byte[] data = isDecypher ? System.Convert.FromBase64String(p) : Encoding.Unicode.GetBytes(p);
+
+                ICryptoTransform d = isDecypher ? td.CreateDecryptor() : td.CreateEncryptor();
+                
+
+                //memory stream for output
+                MemoryStream memStream = new MemoryStream();
+
+            
+                //setup the cryption - output written to memstream
+                CryptoStream cryptStream = new CryptoStream(memStream, d, CryptoStreamMode.Write);
+
+                //write data to cryption engine
+                cryptStream.Write(data, 0, data.Length);
+
+                //we are finished
+                cryptStream.FlushFinalBlock();
+
+                //get result
+                byte[] output = memStream.ToArray();
+
+                //finished with engine, so close the stream
+                cryptStream.Close();
+
+                CDData = isDecypher ? Encoding.Unicode.GetString(output) : Convert.ToBase64String(output);
+            }
+            catch
+            {
+                CDData = "";
+                Properties.Settings.Default.Password = "";
+#if DEBUG
+                MessageBox.Show("Erreur lors du " + (isDecypher ? "dé" : "") + "chiffrement du mot de passe", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+#endif
+            }
+
+            return CDData;
+        }
+
+        /// <summary>
+        /// Chiffrer
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+
+        private string Cypher(string p)
+        {
+            return CD(p, false);
         }
 
         /// <summary>
@@ -467,7 +557,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 
         private void txt_passwd_TextChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Password = txt_passwd.Text;
+            Properties.Settings.Default.Password = Cypher(txt_passwd.Text);
         }
 
         /// <summary>
