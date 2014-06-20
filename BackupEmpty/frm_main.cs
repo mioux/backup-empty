@@ -31,7 +31,13 @@ namespace BackupEmpty
         public frm_main()
         {
             InitializeComponent();
-            
+
+            txt_file.Text = Properties.Settings.Default.File;
+            txt_login.Text = Properties.Settings.Default.Login;
+            txt_passwd.Text = Properties.Settings.Default.Password;
+            txt_server.Text = Properties.Settings.Default.Server;
+            chx_trusted.Checked = Properties.Settings.Default.TrustedConnection;
+
             /*Thread sqlMenu = new Thread(CreateSqlInstanceMenu);
             sqlMenu.Start();*/
             CreateSqlInstanceMenu();
@@ -81,6 +87,7 @@ namespace BackupEmpty
         private void chx_trusted_CheckedChanged(object sender, EventArgs e)
         {
             txt_login.Enabled = txt_passwd.Enabled = !chx_trusted.Checked;
+            Properties.Settings.Default.TrustedConnection = chx_trusted.Checked;
         }
 
         /// <summary>
@@ -90,8 +97,8 @@ namespace BackupEmpty
 
         private string BuildCS()
         {
-            string cnLogin = "Server={0};Database=master;User Id={1};Password={2};Connection Timeout=86400";
-            string cnTrusted = "Server={0};Database=master;Trusted_Connection=True;Connection Timeout=86400";
+            string cnLogin = "Server={0};Database=master;User Id={1};Password={2};Connection Timeout=30";
+            string cnTrusted = "Server={0};Database=master;Trusted_Connection=True;Connection Timeout=30";
             string data = chx_trusted.Checked ? cnTrusted : cnLogin;
 
             return string.Format(data, txt_server.Text, txt_login.Text, txt_passwd.Text);
@@ -428,6 +435,61 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         private void btn_listInstance_Click(object sender, EventArgs e)
         {
             mnu_dlList.Show(MousePosition);
+        }
+
+        /// <summary>
+        /// Sauvegarde du serveur
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void txt_server_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Server = txt_server.Text;
+        }
+
+        /// <summary>
+        /// Sauvegarde du login
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void txt_login_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Login = txt_login.Text;
+        }
+
+        /// <summary>
+        /// Sauvegarde du mot de passe
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void txt_passwd_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Password = txt_passwd.Text;
+        }
+
+        /// <summary>
+        /// Sauvegarde du fichier à restaurer
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void txt_file_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.File = txt_file.Text;
+        }
+
+        /// <summary>
+        /// Fermeture du formulaire
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+        private void frm_main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.Save();
         }
     }
 }

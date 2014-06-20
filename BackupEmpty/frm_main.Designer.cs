@@ -66,6 +66,7 @@
             this.txt_server.Name = "txt_server";
             this.txt_server.Size = new System.Drawing.Size(252, 20);
             this.txt_server.TabIndex = 1;
+            this.txt_server.TextChanged += new System.EventHandler(this.txt_server_TextChanged);
             // 
             // txt_login
             // 
@@ -73,6 +74,7 @@
             this.txt_login.Name = "txt_login";
             this.txt_login.Size = new System.Drawing.Size(285, 20);
             this.txt_login.TabIndex = 3;
+            this.txt_login.TextChanged += new System.EventHandler(this.txt_login_TextChanged);
             // 
             // txt_passwd
             // 
@@ -80,6 +82,7 @@
             this.txt_passwd.Name = "txt_passwd";
             this.txt_passwd.Size = new System.Drawing.Size(285, 20);
             this.txt_passwd.TabIndex = 5;
+            this.txt_passwd.TextChanged += new System.EventHandler(this.txt_passwd_TextChanged);
             // 
             // lbl_login
             // 
@@ -125,6 +128,7 @@
             this.txt_file.Name = "txt_file";
             this.txt_file.Size = new System.Drawing.Size(349, 20);
             this.txt_file.TabIndex = 11;
+            this.txt_file.TextChanged += new System.EventHandler(this.txt_file_TextChanged);
             // 
             // btn_browse
             // 
@@ -244,6 +248,7 @@
             this.MinimizeBox = false;
             this.Name = "frm_main";
             this.Text = "Backup et vidage";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frm_main_FormClosing);
             this.mnu_dlList.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
