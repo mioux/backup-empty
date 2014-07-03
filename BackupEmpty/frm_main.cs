@@ -27,12 +27,12 @@ namespace BackupEmpty
         private SqlConnection con = null;
 
         /// <summary>
-        /// CHANGEME !!! Clef de chiffrement TripleDES
+        /// CHANGEME !!! Clef de chiffrement TripleDES (Longueur 24 exactement)
         /// </summary>
         private static string beKEY = "!+7.Z*~S.;|Te93:X5::J~*D";
 
         /// <summary>
-        /// CHANGEME !!! Vecteur d'initialisation TripleDES
+        /// CHANGEME !!! Vecteur d'initialisation TripleDES (Longueur 8 exactement)
         /// </summary>
         private static string beIV = "z1Tm947j";
 
@@ -54,7 +54,6 @@ namespace BackupEmpty
             chx_savePW.Checked = Settings.Default.SavePW;
 
             bgd_loading.RunWorkerAsync();
-            //CreateSqlInstanceMenu();
         }
 
         /// <summary>
@@ -319,6 +318,8 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                     foreach (DataRow row in tbl_db.Rows)
                     {
                         DataTable files = new DataTable();
+                        com.CommandText = string.Format("use {0}", row["name"]);
+                        com.ExecuteNonQuery();
                         com.CommandText = "exec sp_helpfile";
                         SqlDataAdapter adapt = new SqlDataAdapter(com);
                         adapt.Fill(files);
