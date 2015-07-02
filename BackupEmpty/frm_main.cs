@@ -207,6 +207,7 @@ try
             bool data = false;
 
             con = new SqlConnection(BuildCS());
+            con.InfoMessage += con_InfoMessage;
             try
             {
                 con.Open();
@@ -251,6 +252,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 
             try
             {
+            	LogExec(com.CommandText);
                 con.Open();
                 adapt.Fill(data);
             }
@@ -303,14 +305,17 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                 if (version > 8)
                 {
                     com.CommandText = "exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'";
+                    LogExec(com.CommandText);
                     com.ExecuteNonQuery();
 
                     com.CommandText = "exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'";
+                    LogExec(com.CommandText);
                     com.ExecuteNonQuery();
                 }
                 else
                 {
                     com.CommandText = "exec sp_msforeachdb 'backup log ? with truncate_only'";
+                    LogExec(com.CommandText);
                     com.ExecuteNonQuery();
 
                     DataTable tbl_db = DBList();
@@ -319,14 +324,17 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                     {
                         DataTable files = new DataTable();
                         com.CommandText = string.Format("use {0}", row["name"]);
+                        LogExec(com.CommandText);
                         com.ExecuteNonQuery();
                         com.CommandText = "exec sp_helpfile";
+                        LogExec(com.CommandText);
                         SqlDataAdapter adapt = new SqlDataAdapter(com);
                         adapt.Fill(files);
 
                         foreach (DataRow rowFile in files.Rows)
                         {
                             com.CommandText = string.Format("dbcc shrinkfile({0}, 0)", rowFile["name"].ToString());
+                            LogExec(com.CommandText);
                             com.ExecuteNonQuery();
                         }
                     }
@@ -362,6 +370,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
             try
             {
                 con.Open();
+                LogExec(com.CommandText);
                 object version = com.ExecuteScalar();
                 if (version != null && version.ToString() != "")
                 {
@@ -396,27 +405,29 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         {
             this.Enabled = false;
 
-            if (!TestCS())
-            {
-                MessageBox.Show("Erreur lors de la déconnexion des utilisateurs. Vérifier les paramètres de connexion.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Enabled = true;
-                return;
-            }
-            if (cbx_dblist.SelectedItem.ToString() == string.Empty)
-            {
-                MessageBox.Show("Erreur lors de la déconnexion des utilisateurs. Sélectionnez une base de données.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Enabled = true;
-                return;
-            }
-
-            SqlCommand com = new SqlCommand(string.Empty, con);
-            com.CommandTimeout = 86400;
-
             try
             {
-                con.Open();
-                com.CommandText = string.Format("alter database {0} set restricted_user; alter database {0} set multi_user;", cbx_dblist.SelectedItem.ToString());
-                com.ExecuteNonQuery();
+            	if (!TestCS())
+	            {
+	                MessageBox.Show("Erreur lors de la déconnexion des utilisateurs. Vérifier les paramètres de connexion.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+	                this.Enabled = true;
+	            }
+	            else if (cbx_dblist.SelectedItem.ToString() == string.Empty)
+	            {
+	                MessageBox.Show("Erreur lors de la déconnexion des utilisateurs. Sélectionnez une base de données.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+	                this.Enabled = true;
+	                return;
+	            }
+	            else
+	            {
+		            SqlCommand com = new SqlCommand(string.Empty, con);
+		            com.CommandTimeout = 86400;
+	
+	                con.Open();
+	                com.CommandText = string.Format("alter database {0} set restricted_user with rollback immediate; alter database {0} set multi_user;", cbx_dblist.SelectedValue.ToString());
+	                LogExec(com.CommandText);
+	                com.ExecuteNonQuery();
+	            }
             }
             catch (Exception exp)
             {
@@ -427,10 +438,13 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
             }
             finally
             {
-                con.Close();
+            	if (con.State == ConnectionState.Connecting || con.State == ConnectionState.Open)
+            	{
+            		con.Close();
+            	}
+            	this.Enabled = true;
             }
-
-            this.Enabled = true;
+            
         }
 
         /// <summary>
@@ -464,7 +478,9 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         private void btn_browse_Click(object sender, EventArgs e)
         {
             if (ofd_backup.ShowDialog() == DialogResult.OK)
+            {
                 txt_file.Text = ofd_backup.FileName;
+            }
         }
 
         /// <summary>
@@ -501,10 +517,32 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 
             try
             {
+            	string curDB = cbx_dblist.SelectedValue.ToString();
+            	
                 con.Open();
-                com.CommandText = string.Format("alter database {0} set restricted_user", cbx_dblist.SelectedItem.ToString());
+                com.CommandText = string.Format("alter database {0} set restricted_user with rollback immediate", curDB);
+                LogExec(com.CommandText);
                 com.ExecuteNonQuery();
-                com.CommandText = string.Format("restore database {0} from disk = '{1}' with replace", cbx_dblist.SelectedItem.ToString(), txt_file.Text);
+                
+                DataSet ds = new DataSet();
+                con.ChangeDatabase(curDB);
+                com.CommandText = "exec sp_helpfile";
+                SqlDataAdapter adapter = new SqlDataAdapter(com);
+                adapter.Fill(ds);
+                con.ChangeDatabase("master");
+                	
+                com.CommandText = string.Format("restore database {0} from disk = '{1}' with replace", curDB, txt_file.Text);
+                if (ds.Tables.Count > 0)
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                {
+                	string curFile = dr["name"].ToString();
+                	string curPath = dr["filename"].ToString();
+                	
+                	com.CommandText += string.Format(", MOVE '{0}' TO '{1}'", curFile, curPath);
+                }
+                
+                LogExec(com.CommandText);
+                com.ExecuteNonQuery();
             }
             catch (Exception exp)
             {
@@ -635,6 +673,27 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         {
             SavePwd();
             Settings.Default.SavePW = chx_savePW.Checked;
+        }
+        
+        /// <summary>
+        /// Réception d'un message de la part du serveur SQL.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        
+        private void con_InfoMessage(object sender, SqlInfoMessageEventArgs e)
+        {
+        	rtb_log.ForeColor = SystemColors.WindowText;
+        	rtb_log.Text += e.Message + "\n";
+        }
+        
+        private void LogExec (string command)
+        {
+        	rtb_log.ForeColor = Color.DarkGreen;
+        	foreach (string line in command.Split('\n'))
+        	{
+        		rtb_log.Text += "> " + line + "\n";
+        	}
         }
     }
 }
