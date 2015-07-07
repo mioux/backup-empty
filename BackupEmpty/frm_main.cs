@@ -307,38 +307,18 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                     com.CommandText = "exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'";
                     LogExec(com.CommandText);
                     com.ExecuteNonQuery();
-
-                    com.CommandText = "exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'";
-                    LogExec(com.CommandText);
-                    com.ExecuteNonQuery();
                 }
                 else
                 {
                     com.CommandText = "exec sp_msforeachdb 'backup log ? with truncate_only'";
                     LogExec(com.CommandText);
                     com.ExecuteNonQuery();
-
-                    DataTable tbl_db = DBList();
-
-                    foreach (DataRow row in tbl_db.Rows)
-                    {
-                        DataTable files = new DataTable();
-                        com.CommandText = string.Format("use {0}", row["name"]);
-                        LogExec(com.CommandText);
-                        com.ExecuteNonQuery();
-                        com.CommandText = "exec sp_helpfile";
-                        LogExec(com.CommandText);
-                        SqlDataAdapter adapt = new SqlDataAdapter(com);
-                        adapt.Fill(files);
-
-                        foreach (DataRow rowFile in files.Rows)
-                        {
-                            com.CommandText = string.Format("dbcc shrinkfile({0}, 0)", rowFile["name"].ToString());
-                            LogExec(com.CommandText);
-                            com.ExecuteNonQuery();
-                        }
-                    }
                 }
+                
+
+                com.CommandText = "exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'";
+                LogExec(com.CommandText);
+                com.ExecuteNonQuery();
             }
             catch (Exception exp)
             {
@@ -685,7 +665,13 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         {
         	rtb_log.ForeColor = SystemColors.WindowText;
         	rtb_log.Text += e.Message + "\n";
+        	rtb_log.Refresh();
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
         
         private void LogExec (string command)
         {
@@ -694,6 +680,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         	{
         		rtb_log.Text += "> " + line + "\n";
         	}
+        	rtb_log.Refresh();
         }
     }
 }
