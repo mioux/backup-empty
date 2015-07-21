@@ -296,29 +296,32 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                 return;
             }
 
-            SqlCommand com = new SqlCommand("", con);
-            com.CommandTimeout = 86400;
+            /*SqlCommand com = new SqlCommand("", con);
+            com.CommandTimeout = 86400;*/
 
             try
             {
-                con.Open();
+                //con.Open();
                 if (version > 8)
                 {
-                    com.CommandText = "exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'";
+                    /*com.CommandText = "exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'";
                     LogExec(com.CommandText);
-                    com.ExecuteNonQuery();
+                    com.ExecuteNonQuery();*/
+                    ExecuteNonQuery("exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'");
                 }
                 else
                 {
-                    com.CommandText = "exec sp_msforeachdb 'backup log ? with truncate_only'";
+                    /*com.CommandText = "exec sp_msforeachdb 'backup log ? with truncate_only'";
                     LogExec(com.CommandText);
-                    com.ExecuteNonQuery();
+                    com.ExecuteNonQuery();*/
+                    ExecuteNonQuery("exec sp_msforeachdb 'backup log ? with truncate_only'");
                 }
                 
 
-                com.CommandText = "exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'";
+                /*com.CommandText = "exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'";
                 LogExec(com.CommandText);
-                com.ExecuteNonQuery();
+                com.ExecuteNonQuery();*/
+                ExecuteNonQuery("exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'");
             }
             catch (Exception exp)
             {
@@ -344,14 +347,15 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         {
             int data = -1;
 
-            SqlCommand com = new SqlCommand("SELECT SERVERPROPERTY('ProductVersion')", con);
-            com.CommandTimeout = 86400;
+            /*SqlCommand com = new SqlCommand("SELECT SERVERPROPERTY('ProductVersion')", con);
+            com.CommandTimeout = 86400;*/
 
             try
             {
-                con.Open();
+                /*con.Open();
                 LogExec(com.CommandText);
-                object version = com.ExecuteScalar();
+                object version = com.ExecuteScalar();*/
+                object version = ExecuteScalar("SELECT SERVERPROPERTY('ProductVersion')");
                 if (version != null && version.ToString() != "")
                 {
                     string tmpVersion = version.ToString().Split('.')[0];
@@ -367,10 +371,10 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                 MessageBox.Show(exp.Message);
 #endif
             }
-            finally
+            /*finally
             {
                 con.Close();
-            }
+            }*/
 
             return data;
         }
@@ -400,13 +404,14 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 	            }
 	            else
 	            {
-		            SqlCommand com = new SqlCommand(string.Empty, con);
+		            /*SqlCommand com = new SqlCommand(string.Empty, con);
 		            com.CommandTimeout = 86400;
 	
 	                con.Open();
 	                com.CommandText = string.Format("alter database {0} set restricted_user with rollback immediate; alter database {0} set multi_user;", cbx_dblist.SelectedValue.ToString());
 	                LogExec(com.CommandText);
-	                com.ExecuteNonQuery();
+	                com.ExecuteNonQuery();*/
+	                ExecuteNonQuery(string.Format("alter database {0} set restricted_user with rollback immediate; alter database {0} set multi_user;", cbx_dblist.SelectedValue.ToString()));
 	            }
             }
             catch (Exception exp)
@@ -499,10 +504,11 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
             {
             	string curDB = cbx_dblist.SelectedValue.ToString();
             	
-                con.Open();
+                /*con.Open();
                 com.CommandText = string.Format("alter database {0} set restricted_user with rollback immediate", curDB);
                 LogExec(com.CommandText);
-                com.ExecuteNonQuery();
+                com.ExecuteNonQuery();*/
+                ExecuteNonQuery(string.Format("alter database {0} set restricted_user with rollback immediate", curDB));
                 
                 DataSet ds = new DataSet();
                 con.ChangeDatabase(curDB);
@@ -510,19 +516,23 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                 SqlDataAdapter adapter = new SqlDataAdapter(com);
                 adapter.Fill(ds);
                 con.ChangeDatabase("master");
-                	
-                com.CommandText = string.Format("restore database {0} from disk = '{1}' with replace", curDB, txt_file.Text);
+                
+				string sql = string.Format("restore database {0} from disk = '{1}' with replace", curDB, txt_file.Text);
+                
                 if (ds.Tables.Count > 0)
                 foreach (DataRow dr in ds.Tables[0].Rows)
                 {
                 	string curFile = dr["name"].ToString();
                 	string curPath = dr["filename"].ToString();
                 	
-                	com.CommandText += string.Format(", MOVE '{0}' TO '{1}'", curFile, curPath);
+                	sql += string.Format(", MOVE '{0}' TO '{1}'", curFile, curPath);
                 }
                 
-                LogExec(com.CommandText);
-                com.ExecuteNonQuery();
+                /*com.CommandText = sql;
+  				LogExec(com.CommandText);
+                com.ExecuteNonQuery();*/
+                ExecuteNonQuery(sql);
+                
             }
             catch (Exception exp)
             {
@@ -663,7 +673,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         
         private void con_InfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
-        	rtb_log.ForeColor = SystemColors.WindowText;
+        	//rtb_log.ForeColor = SystemColors.WindowText;
         	rtb_log.Text += e.Message + "\n";
         	rtb_log.Refresh();
         }
@@ -675,12 +685,101 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         
         private void LogExec (string command)
         {
-        	rtb_log.ForeColor = Color.DarkGreen;
+        	//rtb_log.ForeColor = Color.DarkGreen;
         	foreach (string line in command.Split('\n'))
         	{
         		rtb_log.Text += "> " + line + "\n";
         	}
         	rtb_log.Refresh();
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        
+        private int ExecuteNonQuery(string sql)
+        {
+        	SqlCommand com = new SqlCommand(sql, con);
+        	com.CommandTimeout = 86400;
+        	bool wasClosed = false;
+        	
+        	if (con.State == ConnectionState.Broken || con.State == ConnectionState.Closed)
+        	{
+        		wasClosed = true;
+        		con.Open();
+        	}
+        	
+        	LogExec(sql);
+        	int data = com.ExecuteNonQuery();
+        	
+        	if (true == wasClosed)
+        	{
+        		con.Close();
+        	}
+        	
+        	return data;
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        
+        private object ExecuteScalar(string sql)
+        {
+        	SqlCommand com = new SqlCommand(sql, con);
+        	bool wasClosed = false;
+        	if (con.State == ConnectionState.Broken || con.State == ConnectionState.Closed)
+        	{
+        		wasClosed = true;
+        		con.Open();
+        	}
+        	
+        	LogExec(sql);
+        	object data = com.ExecuteScalar();
+        	
+        	if (true == wasClosed)
+        	{
+        		con.Close();
+        	}
+        	
+        	return data;
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        
+        void Btn_aotClick(object sender, EventArgs e)
+        {
+        	this.TopMost = (this.TopMost == false);
+        	
+        	System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_main));
+        	
+        	if (this.TopMost == true)
+        	{
+        		btn_aot.Image = (System.Drawing.Image)(resources.GetObject("pined"));
+        	}
+        	else
+        	{
+        		btn_aot.Image = (System.Drawing.Image)(resources.GetObject("unpined"));
+        	}
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        
+        void Btn_optimizeClick(object sender, EventArgs e)
+        {
+        	MessageBox.Show("Pas encore implémenté");
         }
     }
 }

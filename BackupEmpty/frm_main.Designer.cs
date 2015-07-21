@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
         	this.components = new System.ComponentModel.Container();
+        	System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frm_main));
         	this.lbl_server = new System.Windows.Forms.Label();
         	this.txt_server = new System.Windows.Forms.TextBox();
         	this.txt_login = new System.Windows.Forms.TextBox();
@@ -51,6 +52,8 @@
         	this.bgd_loading = new System.ComponentModel.BackgroundWorker();
         	this.chx_savePW = new System.Windows.Forms.CheckBox();
         	this.rtb_log = new System.Windows.Forms.RichTextBox();
+        	this.btn_aot = new System.Windows.Forms.Button();
+        	this.btn_optimize = new System.Windows.Forms.Button();
         	this.mnu_dlList.SuspendLayout();
         	this.SuspendLayout();
         	// 
@@ -251,11 +254,33 @@
         	this.rtb_log.TabIndex = 15;
         	this.rtb_log.Text = "";
         	// 
+        	// btn_aot
+        	// 
+        	this.btn_aot.Image = ((System.Drawing.Image)(resources.GetObject("unpined")));
+        	this.btn_aot.Location = new System.Drawing.Point(12, 134);
+        	this.btn_aot.Name = "btn_aot";
+        	this.btn_aot.Size = new System.Drawing.Size(23, 23);
+        	this.btn_aot.TabIndex = 16;
+        	this.btn_aot.UseVisualStyleBackColor = true;
+        	this.btn_aot.Click += new System.EventHandler(this.Btn_aotClick);
+        	// 
+        	// btn_optimize
+        	// 
+        	this.btn_optimize.Location = new System.Drawing.Point(111, 134);
+        	this.btn_optimize.Name = "btn_optimize";
+        	this.btn_optimize.Size = new System.Drawing.Size(129, 23);
+        	this.btn_optimize.TabIndex = 17;
+        	this.btn_optimize.Text = "Optimiser (TRES LONG)";
+        	this.btn_optimize.UseVisualStyleBackColor = true;
+        	this.btn_optimize.Click += new System.EventHandler(this.Btn_optimizeClick);
+        	// 
         	// frm_main
         	// 
         	this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         	this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         	this.ClientSize = new System.Drawing.Size(576, 461);
+        	this.Controls.Add(this.btn_optimize);
+        	this.Controls.Add(this.btn_aot);
         	this.Controls.Add(this.rtb_log);
         	this.Controls.Add(this.chx_savePW);
         	this.Controls.Add(this.btn_listInstance);
@@ -284,6 +309,8 @@
         	this.ResumeLayout(false);
         	this.PerformLayout();
         }
+        private System.Windows.Forms.Button btn_optimize;
+        private System.Windows.Forms.Button btn_aot;
         private System.Windows.Forms.RichTextBox rtb_log;
 
         #endregion
