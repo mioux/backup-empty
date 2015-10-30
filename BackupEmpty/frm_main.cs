@@ -765,9 +765,9 @@ begin
 
 		print (@sql_index)
 		exec (@sql_index)
-		fetch next from c into @sql_index
 		
 	end
+	fetch next from c into @sql_index
 end
 
 close c
