@@ -763,7 +763,7 @@ begin
 	if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'')
 	begin
 
-		print (@sql_index)
+		print (''? / '' + @sql_index)
 		exec (@sql_index)
 		
 	end
