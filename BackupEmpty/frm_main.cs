@@ -78,7 +78,8 @@ namespace BackupEmpty
 
             if (string.IsNullOrEmpty(p))
                 return CDData;
-try
+            
+			try
             {
                 TripleDES td = TripleDES.Create();
                 td.IV = Encoding.ASCII.GetBytes(beIV);
@@ -93,7 +94,6 @@ try
 
                 //memory stream for output
                 MemoryStream memStream = new MemoryStream();
-
             
                 //setup the cryption - output written to memstream
                 CryptoStream cryptStream = new CryptoStream(memStream, d, CryptoStreamMode.Write);
@@ -144,8 +144,6 @@ try
             SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
             DataTable dbList = instance.GetDataSources();
 
-            //mnu_dlList.Items.Clear();
-
             foreach (DataRow curServer in dbList.Rows)
             {
                 string name = "";
@@ -154,7 +152,6 @@ try
                 if (curServer["InstanceName"] != null && curServer["InstanceName"] != DBNull.Value && curServer["InstanceName"].ToString() != string.Empty)
                     name += "\\" + curServer["InstanceName"].ToString();
 
-                //mnu_dlList.Items.Add(name,Resources.sql, menuClick);
                 sqlList.Add(name);
             }
         }
@@ -296,31 +293,18 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                 return;
             }
 
-            /*SqlCommand com = new SqlCommand("", con);
-            com.CommandTimeout = 86400;*/
-
             try
             {
-                //con.Open();
                 if (version > 8)
                 {
-                    /*com.CommandText = "exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'";
-                    LogExec(com.CommandText);
-                    com.ExecuteNonQuery();*/
                     ExecuteNonQuery("exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'");
                 }
                 else
                 {
-                    /*com.CommandText = "exec sp_msforeachdb 'backup log ? with truncate_only'";
-                    LogExec(com.CommandText);
-                    com.ExecuteNonQuery();*/
                     ExecuteNonQuery("exec sp_msforeachdb 'backup log ? with truncate_only'");
                 }
                 
 
-                /*com.CommandText = "exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'";
-                LogExec(com.CommandText);
-                com.ExecuteNonQuery();*/
                 ExecuteNonQuery("exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'");
             }
             catch (Exception exp)
@@ -347,14 +331,8 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         {
             int data = -1;
 
-            /*SqlCommand com = new SqlCommand("SELECT SERVERPROPERTY('ProductVersion')", con);
-            com.CommandTimeout = 86400;*/
-
             try
             {
-                /*con.Open();
-                LogExec(com.CommandText);
-                object version = com.ExecuteScalar();*/
                 object version = ExecuteScalar("SELECT SERVERPROPERTY('ProductVersion')");
                 if (version != null && version.ToString() != "")
                 {
@@ -371,10 +349,6 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                 MessageBox.Show(exp.Message);
 #endif
             }
-            /*finally
-            {
-                con.Close();
-            }*/
 
             return data;
         }
@@ -404,13 +378,6 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 	            }
 	            else
 	            {
-		            /*SqlCommand com = new SqlCommand(string.Empty, con);
-		            com.CommandTimeout = 86400;
-	
-	                con.Open();
-	                com.CommandText = string.Format("alter database {0} set restricted_user with rollback immediate; alter database {0} set multi_user;", cbx_dblist.SelectedValue.ToString());
-	                LogExec(com.CommandText);
-	                com.ExecuteNonQuery();*/
 	                ExecuteNonQuery(string.Format("alter database {0} set restricted_user with rollback immediate; alter database {0} set multi_user;", cbx_dblist.SelectedValue.ToString()));
 	            }
             }
@@ -504,10 +471,6 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
             {
             	string curDB = cbx_dblist.SelectedValue.ToString();
             	
-                /*con.Open();
-                com.CommandText = string.Format("alter database {0} set restricted_user with rollback immediate", curDB);
-                LogExec(com.CommandText);
-                com.ExecuteNonQuery();*/
                 ExecuteNonQuery(string.Format("alter database {0} set restricted_user with rollback immediate", curDB));
                 
                 DataSet ds = new DataSet();
@@ -528,9 +491,6 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
                 	sql += string.Format(", MOVE '{0}' TO '{1}'", curFile, curPath);
                 }
                 
-                /*com.CommandText = sql;
-  				LogExec(com.CommandText);
-                com.ExecuteNonQuery();*/
                 ExecuteNonQuery(sql);
                 
             }
@@ -673,7 +633,6 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         
         private void con_InfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
-        	//rtb_log.ForeColor = SystemColors.WindowText;
         	rtb_log.Text += e.Message + "\n";
         	rtb_log.Refresh();
         }
@@ -685,7 +644,6 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         
         private void LogExec (string command)
         {
-        	//rtb_log.ForeColor = Color.DarkGreen;
         	foreach (string line in command.Split('\n'))
         	{
         		rtb_log.Text += "> " + line + "\n";
@@ -779,7 +737,41 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
         
         void Btn_optimizeClick(object sender, EventArgs e)
         {
-        	MessageBox.Show("Pas encore implémenté");
+        	if (!TestCS())
+            {
+                MessageBox.Show("Erreur lors de la purge. Vérifier les paramètres de connexion.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Enabled = true;
+                return;
+            }
+        	
+        	ExecuteNonQuery(@"exec sp_msforeachdb '
+use ?
+declare @sql_index varchar(4000)
+
+declare c cursor for
+select  distinct ''alter index '' + i.name + '' on '' + s.name + ''.'' + t.name + '' rebuild''
+from	sys.indexes i inner join
+		sys.tables t on t.object_id = i.object_id inner join
+		sys.schemas s on t.schema_id = s.schema_id
+where	i.name is not null
+
+open c
+
+fetch next from c into @sql_index
+while @@fetch_status = 0
+begin
+	if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'')
+	begin
+
+		print (@sql_index)
+		exec (@sql_index)
+		fetch next from c into @sql_index
+		
+	end
+end
+
+close c
+deallocate c'");
         }
     }
 }

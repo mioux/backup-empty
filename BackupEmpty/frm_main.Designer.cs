@@ -266,11 +266,11 @@
         	// 
         	// btn_optimize
         	// 
-        	this.btn_optimize.Location = new System.Drawing.Point(111, 134);
+        	this.btn_optimize.Location = new System.Drawing.Point(100, 134);
         	this.btn_optimize.Name = "btn_optimize";
-        	this.btn_optimize.Size = new System.Drawing.Size(129, 23);
+        	this.btn_optimize.Size = new System.Drawing.Size(140, 23);
         	this.btn_optimize.TabIndex = 17;
-        	this.btn_optimize.Text = "Optimiser (TRES LONG)";
+        	this.btn_optimize.Text = "Réindexer (TRES LONG)";
         	this.btn_optimize.UseVisualStyleBackColor = true;
         	this.btn_optimize.Click += new System.EventHandler(this.Btn_optimizeClick);
         	// 
