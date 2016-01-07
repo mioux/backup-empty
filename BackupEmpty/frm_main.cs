@@ -240,9 +240,16 @@ namespace BackupEmpty
                 return data;
             }
 
-            SqlCommand com = new SqlCommand(@"SELECT name
-FROM master..sysdatabases
-WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
+            SqlCommand com = new SqlCommand(@"SELECT	name
+FROM 	master..sysdatabases
+WHERE 	sid <> 0x01 and        -- Not system
+		status & 32    = 0 and -- Not Loading
+		status & 64    = 0 and -- Not Pre recovery
+		status & 128   = 0 and -- Not Recovering
+		status & 256   = 0 and -- Not ""Not recovered""
+		status & 512   = 0 and -- Not Offline
+		status & 1024  = 0 and -- Not Read only
+		status & 32768 = 0     -- Not emergency mode;", con);
             com.CommandTimeout = 86400;
 
             SqlDataAdapter adapt = new SqlDataAdapter(com);
@@ -295,15 +302,7 @@ WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb');", con);
 
             try
             {
-                if (version > 8)
-                {
-                    ExecuteNonQuery("exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'");
-                }
-                else
-                {
-                    ExecuteNonQuery("exec sp_msforeachdb 'backup log ? with truncate_only'");
-                }
-                
+                ExecuteNonQuery("exec sp_msforeachdb 'if ''?'' not in (''master'', ''tempdb'', ''model'', ''msdb'') exec (''alter database ? set recovery simple'')'");
 
                 ExecuteNonQuery("exec sp_msforeachdb 'DBCC SHRINKDATABASE(?, 0)'");
             }
